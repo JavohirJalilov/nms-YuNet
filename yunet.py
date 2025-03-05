@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import onnx
+import onnxruntime as ort
 
 class FaceDetectorYN:
     def __init__(self, model, config, input_size, score_threshold, nms_threshold, top_k, backend_id, target_id):
@@ -66,12 +68,15 @@ class FaceDetectorYN:
 
         # Convert image to blob
         input_blob = cv2.dnn.blobFromImage(pad_image)
-        print(input_blob)
+        # print(input_blob)
         # Forward pass
         output_names = ["cls_8", "cls_16", "cls_32", "obj_8", "obj_16", "obj_32", 
                         "bbox_8", "bbox_16", "bbox_32", "kps_8", "kps_16", "kps_32"]
         self.net.setInput(input_blob)
-        output_blobs = self.net.forward(output_names)
+        # output_blobs = self.net.forward(output_names)
+        ort_sess = ort_sess = ort.InferenceSession('models/face_detection_yunet_2023mar.onnx')
+        output_blobs = ort_sess.run(output_names, {"input": input_blob})
+
         # print(output_blobs.shape)
 
         # Post-process results
